@@ -65,6 +65,42 @@ public class AttachmentService extends AbstractService<Attachment> {
 		return a;
 	}
 
+	/**
+	 * 通过url导入网络图片创建附件
+	 * @param user 当前登录用户
+	 * @param url 图片的网络地址
+	 * @param type 图片类型
+	 * @param name 存入系统附件的名称
+	 * @return
+	 * @throws Exception
+	 */
+	@Transactional
+	public Attachment importWebAttachment(User user, String url, String type, String name) throws Exception {
+		AttachmentBean bean = new AttachmentBean();
+		byte[] img = ImageUtil.readWebImageStream(url, type);
+		bean.data = Base64.getEncoder().encodeToString(img);
+		bean.name = name;
+		return createAttachment(user, bean);
+	}
+	
+	/**
+	 * 导入本地文件（图片）创建附件
+	 * @param user 当前登录用户
+	 * @param url 服务器上文件绝对路径
+	 * @param type 图片类型
+	 * @param name 存入系统附件的名称
+	 * @return
+	 * @throws Exception
+	 */
+	@Transactional
+	public Attachment importLocalAttachment(User user, String url, String name) throws Exception {
+		AttachmentBean bean = new AttachmentBean();
+		byte[] img = ImageUtil.readLocalImageStream(url);
+		bean.data = Base64.getEncoder().encodeToString(img);
+		bean.name = name;
+		return createAttachment(user, bean);
+	}
+
 	@Transactional
 	public void deleteAttachment(User user, Long id) {
 		Attachment a = this.getById(id);
