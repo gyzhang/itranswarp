@@ -1,6 +1,8 @@
 package com.itranswarp.service;
 
+import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,13 +12,16 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.itranswarp.bean.ArticleBean;
 import com.itranswarp.bean.AttachmentBean;
 import com.itranswarp.bean.CategoryBean;
+import com.itranswarp.bean.MarkdownImageBean;
 import com.itranswarp.common.ApiException;
 import com.itranswarp.enums.ApiError;
 import com.itranswarp.enums.Role;
 import com.itranswarp.model.Article;
+import com.itranswarp.model.Attachment;
 import com.itranswarp.model.Category;
 import com.itranswarp.model.User;
 import com.itranswarp.util.IdUtil;
+import com.itranswarp.util.MarkdownFileUtil;
 import com.itranswarp.warpdb.PagedResults;
 import com.itranswarp.web.filter.HttpContext;
 
@@ -179,6 +184,72 @@ public class ArticleService extends AbstractService<Article> {
 		article.imageId = attachmentService.createAttachment(user, atta).id;
 
 		article.textId = textService.createText(bean.content).id;
+
+		this.db.insert(article);
+		return article;
+	}
+
+	/**
+	 * 导入文章
+	 * 
+	 * @param user   当前登录用户
+	 * @param bean   从页面传递过来的文章值对象，其content做了区分复用（将就用了，不改了）
+	 * @param source 源=local（本地导入）|web（网络导入）
+	 * @return
+	 * @throws Exception
+	 */
+	@Transactional
+	public Article importArticle(User user, ArticleBean bean, String source) throws Exception {
+		Article article = new Article();
+		List<String> lines;
+		String fileDir = "";
+		if ("local".equals(source.trim().toLowerCase())) {// 将Markdown文件及其图片文件都上传到服务器了
+			File file = new File(bean.content);// bean.content 是借用来存储服务器上Markdown文件的绝对位置的，例如：/Users/kevin/temp/test.md
+			fileDir = file.getParent();// 服务器上存放Markdown文件的文件夹，供图片标签的相对路径用
+			lines = MarkdownFileUtil.readLines(file);// 读取MD源文件
+		} else {// 将Markdown文件内容复制到导入页面的文本块中上传到服务后台，值为web
+			lines = MarkdownFileUtil.readLines(bean.content);
+		}
+
+		Map<Integer, MarkdownImageBean> imgs = MarkdownFileUtil.readImageLines(lines);// 获取MD源文件中的图片标记
+
+		for (MarkdownImageBean img : imgs.values()) {
+			String url = img.getUrl();
+			String type = img.getType();
+			String tip = img.getTip();
+			String location = img.getLocation();
+			Attachment attachment = null;
+			if ("web".equals(location)) {// 如果是网络图片就导入到系统的附件中
+				attachment = attachmentService.importWebAttachment(user, url, type, tip);// 导入附件
+			} else {// 处理本地图片，图片标签一般是这样的: ![检查防火墙状态](images/检查防火墙状态.png)
+				url = fileDir + System.getProperty("file.separator") + url; // 转换成服务器上的绝对文件路径
+				attachment = attachmentService.importLocalAttachment(user, url, tip);// 导入附件
+			}
+			long attachmentId = attachment.id;
+			img.setAttachmentId(attachmentId);
+			String articleImage = "![" + tip + "](" + "/files/attachments/" + attachmentId + "/l)";
+			img.setImageMark(articleImage);// 替换图片标记为iTranswarp附件格式
+			if (article.imageId == 0) {// 导入的Article的封面图片使用文章的第一张图片
+				article.imageId = attachmentId;
+			}
+		}
+		// 更新原 MD 文件中的图片标记，并将所有的文章内容合并到一个字符串中
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < lines.size(); i++) {// 替换MD文件内容中的图片标签
+			if (imgs.containsKey(i)) {
+				lines.set(i, imgs.get(i).getImageMark());
+			}
+			sb.append(lines.get(i)).append(System.getProperty("line.separator"));// 合并更新了图片标记后的每一行
+		}
+
+		article.id = IdUtil.nextId();
+		article.userId = user.id;
+		article.categoryId = bean.categoryId;
+		article.name = bean.name;
+		article.description = bean.description;
+		article.publishAt = bean.publishAt;
+		article.tags = bean.tags;
+		article.textId = textService.createText(sb.toString()).id;
 
 		this.db.insert(article);
 		return article;

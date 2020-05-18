@@ -194,6 +194,49 @@ public class ApiController extends AbstractController {
 		return article;
 	}
 
+	/**
+	 * 从网络Markdown源文件导入
+	 * @param bean
+	 * @return
+	 */
+	@PostMapping("/articles/import/source")
+	@RoleWith(Role.CONTRIBUTOR)
+	public Article articleImportSource(@RequestBody ArticleBean bean) {
+		Article article = null;
+		try {
+			article = this.articleService.importArticle(HttpContext.getRequiredCurrentUser(), bean, "web");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (article != null) {
+			this.articleService.deleteArticlesFromCache(article.categoryId);
+		}
+		
+		return article;
+	}
+	
+	/**
+	 * 从服务器本地 Markdown 文件导入，需要事先将 Markdown 文件scp到服务器上，用来维护现有离线文章的
+	 * @param bean
+	 * @return
+	 */
+	@PostMapping("/articles/import/local")
+	@RoleWith(Role.CONTRIBUTOR)
+	public Article articleImportLocal(@RequestBody ArticleBean bean) {
+		//bean.content 是借用来存储服务器上Markdown文件的绝对位置的，例如：/Users/kevin/temp/test.md
+		Article article = null;
+		try {
+			article = this.articleService.importArticle(HttpContext.getRequiredCurrentUser(), bean, "local");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (article != null) {
+			this.articleService.deleteArticlesFromCache(article.categoryId);
+		}
+		
+		return article;
+	}
+
 	@PostMapping("/articles/" + ID)
 	@RoleWith(Role.CONTRIBUTOR)
 	public Article articleUpdate(@PathVariable("id") long id, @RequestBody ArticleBean bean) {

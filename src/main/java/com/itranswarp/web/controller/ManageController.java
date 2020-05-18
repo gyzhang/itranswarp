@@ -125,6 +125,24 @@ public class ManageController extends AbstractController {
 		return prepareModelAndView("manage/article/article_form.html", Map.of("id", 0, "action", "/api/articles"));
 	}
 
+	/**
+	 * 从网络 Markdown 源文件的导入，特点是文章中的图片存储在网络上
+	 * @return
+	 */
+	@GetMapping("/article/article_import_source")
+	public ModelAndView articleImportSource() {
+		return prepareModelAndView("manage/article/article_import_source_form.html", Map.of("id", 0, "action", "/api/articles/import/source"));
+	}
+
+	/**
+	 * 从服务器本地 Markdown 文件导入，特点是文章中的图片在本地
+	 * @return
+	 */
+	@GetMapping("/article/article_import_local")
+	public ModelAndView articleImportLocal() {
+		return prepareModelAndView("manage/article/article_import_local_form.html", Map.of("id", 0, "action", "/api/articles/import/local"));
+	}
+
 	@GetMapping("/article/article_update")
 	public ModelAndView articleUpdate(@RequestParam("id") long id) {
 		return prepareModelAndView("manage/article/article_form.html",
