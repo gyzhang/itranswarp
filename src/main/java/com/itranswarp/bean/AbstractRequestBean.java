@@ -17,6 +17,10 @@ public abstract class AbstractRequestBean {
 			.compile("^[a-z][a-z0-9]{0," + (AbstractEntity.VAR_ENUM - 1) + "}$");
 	private static final Pattern PATTERN_TAG = Pattern.compile("^[^\\,\\;]{1," + AbstractEntity.VAR_ENUM + "}$");
 	private static final Pattern PATTERN_HASH = Pattern.compile("^[a-f0-9]{64}$");
+	
+	private long TEXT_LENGTH = 65535L; //MySQL TEXT 字段类型长度
+	private long MEDIUMTEXT_LENGTH = 16777215L; //MySQL MEDIUMTEXT 字段类型长度
+	private long LONGTEXT_LENGTH = 4294967295L; //MySQL LONGTEXT 字段类型长度
 
 	public abstract void validate(boolean createMode);
 
@@ -67,11 +71,11 @@ public abstract class AbstractRequestBean {
 	}
 
 	protected String checkContent(String value) {
-		return checkString("content", 65535, value);
+		return checkString("content", this.MEDIUMTEXT_LENGTH, value); //字段类型修改为 MEDIUMTEXT
 	}
 
 	protected String checkImage(String value) {
-		return checkString("image", 524287, value);
+		return checkString("image", this.LONGTEXT_LENGTH, value); //字段类型修改为 LONGTEXT
 	}
 
 	protected String checkAlias(String value) {
@@ -120,7 +124,14 @@ public abstract class AbstractRequestBean {
 		throw new ApiException(ApiError.PARAMETER_INVALID, "url", "Invalid URL.");
 	}
 
-	private String checkString(String paramName, int maxLength, String s) {
+	/**
+	 * 检查字符串
+	 * @param paramName
+	 * @param maxLength 最大长度，为了存储MEDIUMTEXT和LONGTEXT，将参数类型从 int 修改为 long
+	 * @param s
+	 * @return
+	 */
+	private String checkString(String paramName, long maxLength, String s) {
 		if (s == null) {
 			throw new ApiException(ApiError.PARAMETER_INVALID, paramName,
 					"Parameter " + paramName + " must not be null.");

@@ -32,7 +32,7 @@ public class Resource extends AbstractEntity {
 	@Column(nullable = false, updatable = false, length = VAR_ENUM)
 	public ResourceEncoding encoding;
 
-	@Column(nullable = false, updatable = false, columnDefinition = "MEDIUMTEXT")
+	@Column(nullable = false, updatable = false, columnDefinition = "LONGTEXT")
 	public String content;
 
 	public byte[] decode() {

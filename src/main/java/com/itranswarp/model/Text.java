@@ -12,7 +12,7 @@ public class Text extends AbstractEntity {
 	@Column(nullable = false, updatable = false, length = VAR_CHAR_HASH)
 	public String hash;
 
-	@Column(nullable = false, updatable = false, columnDefinition = "TEXT")
+	@Column(nullable = false, updatable = false, columnDefinition = "MEDIUMTEXT")
 	public String content;
 
 }
