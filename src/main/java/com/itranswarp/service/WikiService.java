@@ -1,5 +1,7 @@
 package com.itranswarp.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,14 +13,20 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.itranswarp.bean.AttachmentBean;
+import com.itranswarp.bean.GitbookSummaryBean;
+import com.itranswarp.bean.MarkdownImageBean;
 import com.itranswarp.bean.WikiBean;
+import com.itranswarp.bean.WikiImportBean;
 import com.itranswarp.bean.WikiPageBean;
 import com.itranswarp.common.ApiException;
 import com.itranswarp.enums.ApiError;
+import com.itranswarp.model.Attachment;
 import com.itranswarp.model.User;
 import com.itranswarp.model.Wiki;
 import com.itranswarp.model.WikiPage;
+import com.itranswarp.util.GitbookSummaryUtil;
 import com.itranswarp.util.IdUtil;
+import com.itranswarp.util.MarkdownFileUtil;
 
 @Component
 public class WikiService extends AbstractService<Wiki> {
@@ -120,6 +128,72 @@ public class WikiService extends AbstractService<Wiki> {
 		atta.data = bean.image;
 		wiki.imageId = this.attachmentService.createAttachment(user, atta).id;
 		this.db.insert(wiki);
+		return wiki;
+	}
+	
+	/**
+	 * @throws Exception 
+	 * 从gitbook导入wiki
+	 * @param user
+	 * @param bean
+	 * @return
+	 * @throws IOException 
+	 * @throws  
+	 */
+	@Transactional
+	public Wiki importWiki(User user, WikiImportBean bean) throws Exception {
+		long wikiId = bean.wikiId;
+		Wiki wiki = this.getById(wikiId);
+		String fileName = bean.gitbookPath + System.getProperty("file.separator") + "SUMMARY.md";
+		List<GitbookSummaryBean> list = GitbookSummaryUtil.readLines(new File(fileName));
+		for (GitbookSummaryBean summary: list) {
+			long parentId;
+			if (summary.getParent() == null) { // 没有父节点的是“第1章”这样的，直接挂到wiki下
+				parentId = wikiId;
+			} else {
+				parentId = summary.getParent().getId();
+			}
+			//处理页面文件中的附件（图片）
+			String pageFile = bean.gitbookPath + System.getProperty("file.separator") + summary.getMarkdownFile();
+			List<String> lines = MarkdownFileUtil.readLines(new File(pageFile));//页面内容
+			Map<Integer, MarkdownImageBean> imgs = MarkdownFileUtil.readImageLines(lines);// 获取MD源文件中的图片标记
+			for (MarkdownImageBean img : imgs.values()) {
+				String url = img.getUrl();
+				String type = img.getType();
+				String tip = img.getTip();
+				String location = img.getLocation();
+				Attachment attachment = null;
+				if ("web".equals(location)) {// 如果是网络图片就导入到系统的附件中
+					attachment = attachmentService.importWebAttachment(user, url, type, tip);// 导入附件
+				} else {// 处理本地图片，图片标签一般是这样的: ![检查防火墙状态](images/检查防火墙状态.png)
+					url = pageFile.subSequence(0, pageFile.lastIndexOf("/") + 1) + url; // 转换成服务器上的绝对文件路径
+					attachment = attachmentService.importLocalAttachment(user, url, tip);// 导入附件
+				}
+				long attachmentId = attachment.id;
+				img.setAttachmentId(attachmentId);
+				String imageMark = "![" + tip + "](" + "/files/attachments/" + attachmentId + "/l)";
+				img.setImageMark(imageMark);// 替换图片标记为iTranswarp附件格式
+			}
+			// 更新页面文件中的图片标记，并将所有的页面内容合并到一个字符串中
+			StringBuffer sbPage = new StringBuffer();
+			for (int i = 0; i < lines.size(); i++) {// 替换MD文件内容中的图片标签
+				if (imgs.containsKey(i)) {
+					lines.set(i, imgs.get(i).getImageMark());
+				}
+				sbPage.append(lines.get(i)).append(System.getProperty("line.separator"));// 合并更新了图片标记后的每一行
+			}
+			
+			WikiPage page = new WikiPage();
+			page.wikiId = wikiId;
+			page.parentId = parentId;
+			page.name = summary.getTitle();
+			page.publishAt = wiki.publishAt;//使用wiki的发布时间，一家人就是要整整齐齐嘛
+			page.textId = textService.createText(sbPage.toString()).id;
+			page.displayOrder = summary.getDisplayOrder();
+			this.db.insert(page);
+			
+			summary.setId(page.id);//供后续获取父页面id用
+		}
 		return wiki;
 	}
 

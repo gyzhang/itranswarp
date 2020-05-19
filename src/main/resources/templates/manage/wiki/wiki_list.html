@@ -30,6 +30,22 @@ function initVM(wikis) {
         	isPublished: function (w) {
         		return g_timestamp > w.publishAt;
         	},
+        	importBook: function (w) {// 从gitbook导入wiki
+        		var now = Date.now();
+        		UIkit.modal.prompt("{{ _('Gitbook在服务器上的位置') }}:", "{{ _('/Users/kevin/temp/demobook') }}", function (path) {
+                    postJSON('/api/wikiImport', {
+                    	wikiId: w.id,
+                        gitbookPath: path,
+                        publishAt: now,
+                        content: 'New wiki page content'
+                    }, function(err, result) {
+                        if (err) {
+                            showError(err);
+                            return;
+                        }
+                    });
+                });
+            },
             editWiki: function (w) {
                 location.assign('wiki_tree?id=' + w.id);
             },
@@ -90,6 +106,7 @@ function initVM(wikis) {
                     <td><span v-text="w.tag"></span></td>
                     <td><span v-text="w.publishAt.toDateTime()"></span></td>
                     <td>
+                        <a v-on:click="importBook(w)" data-toggle="tooltip" title="在当前新Wiki上导入一本Gitbook" href="#0" class="x-btn"><i class="uk-icon-book"></i></a>
                         <a v-on:click="editWiki(w)" data-toggle="tooltip" title="Edit Wiki" href="#0" class="x-btn"><i class="uk-icon-list"></i></a>
                         <a v-on:click="deleteWiki(w)" data-toggle="tooltip" title="Delete wiki" href="#0" class="x-btn"><i class="uk-icon-trash"></i></a>
                     </td>

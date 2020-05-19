@@ -25,6 +25,7 @@ public class GitbookSummaryUtil {
 			List<GitbookSummaryBean> summary = new ArrayList<GitbookSummaryBean>();
 			String line;
 			int[] displayOrders = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };// 最多支持10级目录，第0级不用
+			GitbookSummaryBean[] parents = new GitbookSummaryBean[] { null, null, null, null, null, null, null, null, null, null, null };// 最多支持10级目录，第0级不用
 			int preLineLevel = 1;// 前一行的级别
 			int curLineLevel = 1;// 当前行的级别
 			// 按行读取字符串
@@ -45,23 +46,25 @@ public class GitbookSummaryUtil {
 					curLineLevel = s.length() / 4 + 1;
 				}
 				bean.setLevel(curLineLevel);// 当前目录行级别
-				
-				if (curLineLevel == preLineLevel) {//同级
+				bean.setParent(parents[curLineLevel]);// 当前页面的父页面
+				parents[curLineLevel + 1] = bean; // 当前页面就是后续下级页面的父页面
+
+				if (curLineLevel == preLineLevel) {// 同级
 					bean.setDisplayOrder(displayOrders[curLineLevel]);
 					displayOrders[curLineLevel] = displayOrders[curLineLevel] + 1;// 当前编号+1，为下一行做准备
 				}
 				if (curLineLevel > preLineLevel) {// 向下降级
-					bean.setDisplayOrder(0);//重新编号
+					bean.setDisplayOrder(0);// 重新编号
 					displayOrders[curLineLevel] = displayOrders[curLineLevel] + 1;// 当前编号+1，为下一行做准备
-					
 				}
-				if (curLineLevel < preLineLevel){// 向上升级，沿用既有编号
+				if (curLineLevel < preLineLevel) {// 向上升级，沿用既有编号
 					for (int i = curLineLevel; i < displayOrders.length - 1; i++) {// 将当前级以下的全部置0，重新编号
 						displayOrders[i + 1] = 0;
+						parents[curLineLevel] = null;
 					}
 					bean.setDisplayOrder(displayOrders[curLineLevel]);
 				}
-				
+
 				summary.add(bean);
 				preLineLevel = curLineLevel;// 下一行的前一行就是当前行
 			}
