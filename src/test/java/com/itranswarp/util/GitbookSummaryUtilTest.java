@@ -14,7 +14,12 @@ public class GitbookSummaryUtilTest {
 		String fileName = "/Users/kevin/temp/demobook/SUMMARY.md";
 		List<GitbookSummaryBean> list = GitbookSummaryUtil.readLines(new File(fileName));
 		for (GitbookSummaryBean bean: list) {
-			System.out.println("级别："+bean.getLevel() + ", 序号：" + bean.getDisplayOrder() + ", 标题：" + bean.getTitle() + ", 文件：" + bean.getMarkdownFile() + ", 行：" + bean.getContent());
+			GitbookSummaryBean parent = bean.getParent();
+			String parentTitle = "";
+			if (parent != null) {
+				parentTitle = parent.getTitle();
+			}
+			System.out.println("父：" + parentTitle + ", 级别："+bean.getLevel() + ", 序号：" + bean.getDisplayOrder() + ", 标题：" + bean.getTitle() + ", 文件：" + bean.getMarkdownFile() + ", 行：" + bean.getContent());
 		}
 	}
 

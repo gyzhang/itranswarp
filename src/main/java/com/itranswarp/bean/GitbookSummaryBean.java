@@ -14,7 +14,7 @@ public class GitbookSummaryBean {
 	private int level;// 当前页面所处的级别：3级
 	private int displayOrder;// 同层页面显示序号：0
 	private long id;// 当前页面的编码，导入wiki page后，就是数据库内的编码
-	private long parentId;// 当前页面的父页面的编码，一级内容页面（如第1章）的parentId就是wiki的id
+	private GitbookSummaryBean parent;// 当前这个目录文件的父文件，就是挂靠目录树用的
 
 	public String getContent() {
 		return content;
@@ -64,11 +64,11 @@ public class GitbookSummaryBean {
 		this.id = id;
 	}
 
-	public long getParentId() {
-		return parentId;
+	public GitbookSummaryBean getParent() {
+		return parent;
 	}
 
-	public void setParentId(long parentId) {
-		this.parentId = parentId;
+	public void setParent(GitbookSummaryBean parent) {
+		this.parent = parent;
 	}
 }

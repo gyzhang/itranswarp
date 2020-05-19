@@ -1,5 +1,6 @@
 package com.itranswarp.web.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import com.itranswarp.bean.SinglePageBean;
 import com.itranswarp.bean.SortBean;
 import com.itranswarp.bean.TopicBean;
 import com.itranswarp.bean.WikiBean;
+import com.itranswarp.bean.WikiImportBean;
 import com.itranswarp.bean.WikiPageBean;
 import com.itranswarp.bean.WikiPageMoveBean;
 import com.itranswarp.bean.setting.Follow;
@@ -778,6 +780,24 @@ public class ApiController extends AbstractController {
 	@RoleWith(Role.EDITOR)
 	public Wiki wikiCreate(@RequestBody WikiBean bean) {
 		Wiki wiki = this.wikiService.createWiki(HttpContext.getRequiredCurrentUser(), bean);
+		this.wikiService.removeWikiFromCache(wiki.id);
+		return wiki;
+	}
+
+	/**
+	 * 接收参数将gitbook导入wiki
+	 * @param bean
+	 * @return
+	 */
+	@PostMapping("/wikiImport")
+	@RoleWith(Role.EDITOR)
+	public Wiki wikiImport(@RequestBody WikiImportBean bean) {
+		Wiki wiki = wikiService.getById(bean.wikiId);
+		try {
+			wiki = this.wikiService.importWiki(HttpContext.getRequiredCurrentUser(), bean);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		this.wikiService.removeWikiFromCache(wiki.id);
 		return wiki;
 	}

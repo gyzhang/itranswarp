@@ -1,5 +1,7 @@
 package com.itranswarp.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,13 +13,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.itranswarp.bean.AttachmentBean;
+import com.itranswarp.bean.GitbookSummaryBean;
 import com.itranswarp.bean.WikiBean;
+import com.itranswarp.bean.WikiImportBean;
 import com.itranswarp.bean.WikiPageBean;
 import com.itranswarp.common.ApiException;
 import com.itranswarp.enums.ApiError;
 import com.itranswarp.model.User;
 import com.itranswarp.model.Wiki;
 import com.itranswarp.model.WikiPage;
+import com.itranswarp.util.GitbookSummaryUtil;
 import com.itranswarp.util.IdUtil;
 
 @Component
@@ -120,6 +125,42 @@ public class WikiService extends AbstractService<Wiki> {
 		atta.data = bean.image;
 		wiki.imageId = this.attachmentService.createAttachment(user, atta).id;
 		this.db.insert(wiki);
+		return wiki;
+	}
+	
+	/**
+	 * 从gitbook导入wiki
+	 * @param user
+	 * @param bean
+	 * @return
+	 * @throws IOException 
+	 * @throws  
+	 */
+	@Transactional
+	public Wiki importWiki(User user, WikiImportBean bean) throws IOException {
+		long wikiId = bean.wikiId;
+		Wiki wiki = this.getById(wikiId);
+		String fileName = bean.gitbookPath + System.getProperty("file.separator") + "SUMMARY.md";
+		List<GitbookSummaryBean> list = GitbookSummaryUtil.readLines(new File(fileName));
+		for (GitbookSummaryBean summary: list) {
+			long parentId;
+			if (summary.getParent() == null) { // 没有父节点的是“第1章”这样的，直接挂到wiki下
+				parentId = wikiId;
+			} else {
+				parentId = summary.getParent().getId();
+			}
+			
+			WikiPage page = new WikiPage();
+			page.wikiId = wikiId;
+			page.parentId = parentId;
+			page.name = summary.getTitle();
+			page.publishAt = bean.publishAt;
+			page.textId = textService.createText(bean.content).id;//TDOO: 直接导入markdown文件内容
+			page.displayOrder = summary.getDisplayOrder();
+			this.db.insert(page);
+			
+			summary.setId(page.id);//供后续获取父页面id用
+		}
 		return wiki;
 	}
 
