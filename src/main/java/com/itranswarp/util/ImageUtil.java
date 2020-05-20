@@ -45,7 +45,12 @@ public class ImageUtil {
 					reader = readers.next();
 					reader.setInput(input);
 					format = reader.getFormatName();
-					image = reader.read(0);
+					if ("gif".equals(format)) {//解决jdk的gif读取错误：Index 4096 out of bounds for length 4096
+						image = GifDecoder.read(data).getFrame(0);
+					} else {
+						image = reader.read(0);
+					}
+					
 					if (readers.hasNext()) {
 						throw new ApiException(ApiError.PARAMETER_INVALID, "data", "Invalid data.");
 					}
