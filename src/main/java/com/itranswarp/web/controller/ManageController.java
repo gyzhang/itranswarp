@@ -322,7 +322,11 @@ public class ManageController extends AbstractController {
 			@RequestParam(value = "q", defaultValue = "") String q) {
 		return prepareModelAndView("manage/user/user_list.html", Map.of("page", pageIndex, "q", q));
 	}
-
+	@GetMapping("/user/user_create")
+	public ModelAndView userCreate() {
+		return prepareModelAndView("manage/user/user_form.html", Map.of("id", 0, "action", "/api/userCreate"));
+	}
+	
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	// utility
 	///////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,102 @@
+{% extends '../_manage.html' %}
+
+{% block title %} {{ form.name }} {% endblock %}
+
+{% block head %}
+
+<script>
+
+$(function() {
+	initVM({
+		title: '创建本地新用户'
+	});
+});
+
+function initVM(data) {
+    window.vm = new Vue({
+        el: '#vm',
+        data: {
+        	title: data.title,
+        	localUser: {
+        		email: '',
+        		name: '',
+        		password: '',
+        		imageUrl: ''
+        	}
+        },
+        created: function () {
+            $('#loading').hide();
+            $('#vm').show();
+        },
+        methods: {
+            submit: function () {
+                var that = this;
+                that.$resource('{{ action }}').save(this.localUser).then(function (resp) {
+                    resp.json().then(function (result) {
+                    	that.saved = true;
+                        location.assign('/manage/user/');
+                    });
+                }, onJsonFormError);
+            }
+        }
+    });
+}
+</script>
+
+{% endblock %}
+
+{% block main %}
+
+    <div id="loading" class="uk-width-1-1">
+        <i class="uk-icon-spinner uk-icon-spin"></i> {{ _('Loading') }}...
+    </div>
+
+    <div id="vm" class="uk-width-1-1">
+        <ul class="uk-breadcrumb">
+            <li><a href="/manage/user/">{{ _('所有用户') }}</a></li>
+            <li class="uk-active"><span v-text="title"></span></li>
+        </ul>
+
+        <form v-on:submit.prevent="submit" class="uk-form uk-form-stacked uk-margin">
+            <legend v-text="title"></legend>
+            <fieldset>
+                <div class="uk-alert uk-alert-danger uk-hidden"></div>
+
+                <div class="uk-form-row">
+                    <label class="uk-form-label">{{ _('邮件地址') }}:</label>
+                    <div class="uk-form-controls">
+                        <input v-model="localUser.email" name="email" type="text" maxlength="100" class="uk-width-1-1" placeholder="foo@bar.com">
+                    </div>
+                </div>
+
+                <div class="uk-form-row">
+                    <label class="uk-form-label">{{ _('用户名') }}:</label>
+                    <div class="uk-form-controls">
+                        <input v-model="localUser.name" name="name" type="text" maxlength="100" class="uk-width-1-1" placeholder="name">
+                    </div>
+                </div>
+
+                <div class="uk-form-row">
+                    <label class="uk-form-label">{{ _('密码') }}:</label>
+                    <div class="uk-form-controls">
+                        <input v-model="localUser.password" name="password" type="text" maxlength="100" class="uk-width-1-1" placeholder="password">
+                    </div>
+                </div>
+
+                <div class="uk-form-row">
+                    <label class="uk-form-label">{{ _('头像图片') }}:(/static/img/user.png 或 /static/img/admin.png)</label>
+                    <div class="uk-form-controls">
+                        <input v-model="localUser.imageUrl" name="imageUrl" type="text" maxlength="100" class="uk-width-1-1" placeholder="/static/img/user.png">
+                    </div>
+                </div>
+                <div class="uk-form-row">
+                    <div class="uk-form-controls">
+                        <button type="submit" class="uk-button uk-button-primary"><i class="uk-icon-check"></i> Save</button>
+                        <button type="button" class="uk-button" onclick="location.assign('/manage/user/')"><i class="uk-icon-times"></i> Cancel</button>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+
+{% endblock %}

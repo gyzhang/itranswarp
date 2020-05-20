@@ -26,6 +26,7 @@ import com.itranswarp.bean.ReplyBean;
 import com.itranswarp.bean.SinglePageBean;
 import com.itranswarp.bean.SortBean;
 import com.itranswarp.bean.TopicBean;
+import com.itranswarp.bean.UserBean;
 import com.itranswarp.bean.WikiBean;
 import com.itranswarp.bean.WikiImportBean;
 import com.itranswarp.bean.WikiPageBean;
@@ -729,6 +730,12 @@ public class ApiController extends AbstractController {
 		return new PagedResults<>(new Page(1, users.size(), 1, users.size()), users);
 	}
 
+	@PostMapping("/userCreate")
+	@RoleWith(Role.ADMIN)
+	public User userCreate(@RequestBody UserBean localUser) {
+		return this.userService.createLocalUser(localUser.email, localUser.password, localUser.name, localUser.imageUrl);
+	}
+	
 	@GetMapping("/users/ids")
 	@RoleWith(Role.CONTRIBUTOR)
 	public Map<Long, User> usersByIds(@RequestParam("id") long[] ids) {
@@ -740,6 +747,12 @@ public class ApiController extends AbstractController {
 	@RoleWith(Role.ADMIN)
 	public User userUpdateRole(@PathVariable("id") long id, @PathVariable("role") Role role) {
 		return this.userService.updateUserRole(id, role);
+	}
+
+	@PostMapping("/users/updatePassword/{userId}")
+	@RoleWith(Role.ADMIN)
+	public User userUpdatePassword(@PathVariable("userId") long userId, @RequestBody UserBean localUser) {
+		return this.userService.updateUserPassword(userId, localUser.password);
 	}
 
 	@PostMapping("/users/" + ID + "/lock/{timestamp}")

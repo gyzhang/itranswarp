@@ -173,6 +173,16 @@ public class UserService extends AbstractService<User> {
 		}
 		return user;
 	}
+	
+	@Transactional
+	public User updateUserPassword(Long id, String password) {
+		User user = getById(id);
+		LocalAuth auth = this.db.fetch("select * from local_auths where userId = " + id); 
+		auth.salt = RandomUtil.createRandomString(AbstractEntity.VAR_CHAR_HASH);
+		auth.passwd = HashUtil.hmacSha256(password, auth.salt);
+		this.db.update(auth);
+		return user;
+	}
 
 	@Transactional
 	public User updateUserLockedUntil(Long id, long ts) {

@@ -115,6 +115,21 @@ function initVM(data) {
                 }, function () {
                     u.unlockAction = 0;
                 });
+            },
+            editUserPassword: function (u) {
+                var that = this;
+                var userId = u.id;
+                UIkit.modal.prompt("{{ _('修改密码') }}:", "password", function (newPassword) {
+                    postJSON('/api/users/updatePassword/' + u.id, {
+                    	name: 'mockName',
+                    	password: newPassword
+                    }, function(err, result) {
+                        if (err) {
+                            showError(err);
+                            return;
+                        }
+                    });
+                });
             }
         }
     });
@@ -142,6 +157,7 @@ function initVM(data) {
                 <input name="q" value="{{ q }}" maxlength="100" placeholder="user id or name" class="uk-form-width-large">
                 <button class="uk-button"><i class="uk-icon-search"></i> Search</button>
             </form>
+            <a href="user_create" class="uk-button uk-button-primary uk-float-right"><i class="uk-icon-plus"></i> {{ _('新用户') }}</a>
         </div>
 
         <table class="uk-table uk-table-hover">
@@ -175,6 +191,7 @@ function initVM(data) {
                     	<span v-text="u.email"></span>
                     	<br>
                     	<span v-text="u.id" class="uk-text-muted"></span>
+                    	<a v-on:click="editUserPassword(u)" title="修改密码" href="#0" class="x-btn"><i class="uk-icon-edit"></i></a>
                     </td>
                     <td><span v-text="u.createdAt.toDateTime()"></span></td>
                     <td>

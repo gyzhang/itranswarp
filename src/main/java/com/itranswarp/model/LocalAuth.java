@@ -17,10 +17,10 @@ public class LocalAuth extends AbstractEntity {
 	@Column(nullable = false, updatable = false)
 	public long userId;
 
-	@Column(nullable = false, updatable = false, length = VAR_CHAR_HASH)
+	@Column(nullable = false, updatable = true, length = VAR_CHAR_HASH)
 	public String passwd;
 
-	@Column(nullable = false, updatable = false, length = VAR_CHAR_HASH)
+	@Column(nullable = false, updatable = true, length = VAR_CHAR_HASH)
 	public String salt;
 
 }
