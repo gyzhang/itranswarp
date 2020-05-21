@@ -3,6 +3,7 @@
 {% block title %} {{ _('All Users') }} {% endblock %}
 
 {% block head %}
+<script src="/static/js/3rdparty/sha256.js"></script>
 <script>
 
 var page = parseInt('{{ page }}');
@@ -119,10 +120,11 @@ function initVM(data) {
             editUserPassword: function (u) {
                 var that = this;
                 var userId = u.id;
+                var email = u.email;
                 UIkit.modal.prompt("{{ _('修改密码') }}:", "password", function (newPassword) {
                     postJSON('/api/users/updatePassword/' + u.id, {
                     	name: 'mockName',
-                    	password: newPassword
+                    	password: sha256.hmac(email, newPassword)
                     }, function(err, result) {
                         if (err) {
                             showError(err);

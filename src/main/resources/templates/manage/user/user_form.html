@@ -3,7 +3,7 @@
 {% block title %} {{ form.name }} {% endblock %}
 
 {% block head %}
-
+<script src="/static/js/3rdparty/sha256.js"></script>
 <script>
 
 $(function() {
@@ -31,6 +31,8 @@ function initVM(data) {
         methods: {
             submit: function () {
                 var that = this;
+                pwd = $('#passwd').val();
+                this.localUser.password = sha256.hmac(this.localUser.email, pwd);
                 that.$resource('{{ action }}').save(this.localUser).then(function (resp) {
                     resp.json().then(function (result) {
                     	that.saved = true;
@@ -79,7 +81,7 @@ function initVM(data) {
                 <div class="uk-form-row">
                     <label class="uk-form-label">{{ _('密码') }}:</label>
                     <div class="uk-form-controls">
-                        <input v-model="localUser.password" name="password" type="text" maxlength="100" class="uk-width-1-1" placeholder="password">
+                        <input id="passwd" name = "passwd" type="text" maxlength="100" class="uk-width-1-1" placeholder="password">
                     </div>
                 </div>
 

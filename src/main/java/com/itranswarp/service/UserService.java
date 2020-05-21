@@ -177,8 +177,8 @@ public class UserService extends AbstractService<User> {
 	@Transactional
 	public User updateUserPassword(Long id, String password) {
 		User user = getById(id);
-		LocalAuth auth = this.db.fetch("select * from local_auths where userId = " + id); 
-		auth.salt = RandomUtil.createRandomString(AbstractEntity.VAR_CHAR_HASH);
+		LocalAuth auth = fetchLocalAuthByUserId(user.id); 
+		auth.salt = RandomUtil.createRandomString(AbstractEntity.VAR_CHAR_HASH);//修改密码时重置“盐”
 		auth.passwd = HashUtil.hmacSha256(password, auth.salt);
 		this.db.update(auth);
 		return user;
