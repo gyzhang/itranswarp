@@ -14,9 +14,9 @@
 			<pattern>${CONSOLE_LOG_PATTERN}</pattern>
 			<charset>utf8</charset>
 		</encoder>
-		<file>/Users/kevin/temp/itranswarp/log/app.log</file>
+		<file>/var/log/itranswarp/app.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-			<fileNamePattern>/Users/kevin/temp/itranswarp/log/app.log.%i</fileNamePattern>
+			<fileNamePattern>/var/log/itranswarp/app.log.%i</fileNamePattern>
 		</rollingPolicy>
 		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
 			<MaxFileSize>100MB</MaxFileSize>
