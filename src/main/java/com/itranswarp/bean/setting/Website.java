@@ -23,10 +23,16 @@ public class Website extends AbstractSettingBean {
 	@SettingInput(value = InputType.TEXT, order = 6, description = "Copyright")
 	public String copyright;
 
-	@SettingInput(value = InputType.TEXTAREA, order = 6, description = "Custom header")
+	@SettingInput(value = InputType.TEXT, order = 7, description = "Registering at MIIT")
+	public String registration;
+
+	@SettingInput(value = InputType.TEXT, order = 8, description = "Using HD Image in Article and Wiki Page")
+	public String hdImage;
+
+	@SettingInput(value = InputType.TEXTAREA, order = 9, description = "Custom header")
 	public String customHeader;
 
-	@SettingInput(value = InputType.TEXTAREA, order = 7, description = "Custom footer")
+	@SettingInput(value = InputType.TEXTAREA, order = 10, description = "Custom footer")
 	public String customFooter;
 
 }

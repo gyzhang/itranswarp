@@ -36,6 +36,9 @@ public class ArticleService extends AbstractService<Article> {
 
 	@Autowired
 	ViewService viewService;
+	
+	@Autowired
+	SettingService settingService;
 
 	static final String KEY_RECENT_ARTICLES = "__recent_articles__";
 	static final String KEY_ARTICLES_FIRST_PAGE = "__articles__";
@@ -200,6 +203,11 @@ public class ArticleService extends AbstractService<Article> {
 	 */
 	@Transactional
 	public Article importArticle(User user, ArticleBean bean, String source) throws Exception {
+		String hdImage = settingService.getWebsiteFromCache().hdImage;
+		boolean usingHD = false;
+		if (null != hdImage && hdImage.length() > 0) {
+			usingHD = hdImage.toLowerCase().equals("hd")? true: false;
+		}
 		Article article = new Article();
 		List<String> lines;
 		String fileDir = "";
@@ -227,7 +235,12 @@ public class ArticleService extends AbstractService<Article> {
 			}
 			long attachmentId = attachment.id;
 			img.setAttachmentId(attachmentId);
-			String articleImage = "![" + tip + "](" + "/files/attachments/" + attachmentId + "/l)";
+			String articleImage;
+			if (usingHD) {
+				articleImage = "![" + tip + "](" + "/files/attachments/" + attachmentId + "/0)";//高清图
+			} else {
+				articleImage = "![" + tip + "](" + "/files/attachments/" + attachmentId + "/l)";
+			}
 			img.setImageMark(articleImage);// 替换图片标记为iTranswarp附件格式
 			if (article.imageId == 0) {// 导入的Article的封面图片使用文章的第一张图片
 				article.imageId = attachmentId;

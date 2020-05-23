@@ -37,6 +37,9 @@ public class WikiService extends AbstractService<Wiki> {
 	@Autowired
 	AttachmentService attachmentService;
 
+	@Autowired
+	SettingService settingService;
+
 	static final String KEY_WIKIS = "__wikis__";
 
 	public void removeWikiFromCache(Long id) {
@@ -142,6 +145,11 @@ public class WikiService extends AbstractService<Wiki> {
 	 */
 	@Transactional
 	public Wiki importWiki(User user, WikiImportBean bean) throws Exception {
+		String hdImage = settingService.getWebsiteFromCache().hdImage;
+		boolean usingHD = false;
+		if (null != hdImage && hdImage.length() > 0) {
+			usingHD = hdImage.toLowerCase().equals("hd")? true: false;
+		}
 		long wikiId = bean.wikiId;
 		Wiki wiki = this.getById(wikiId);
 		String fileName = bean.gitbookPath + System.getProperty("file.separator") + "SUMMARY.md";
@@ -171,7 +179,12 @@ public class WikiService extends AbstractService<Wiki> {
 				}
 				long attachmentId = attachment.id;
 				img.setAttachmentId(attachmentId);
-				String imageMark = "![" + tip + "](" + "/files/attachments/" + attachmentId + "/l)";
+				String imageMark;
+				if (usingHD) {
+					imageMark = "![" + tip + "](" + "/files/attachments/" + attachmentId + "/0)";//高清图
+				} else {
+					imageMark = "![" + tip + "](" + "/files/attachments/" + attachmentId + "/l)";
+				}
 				img.setImageMark(imageMark);// 替换图片标记为iTranswarp附件格式
 			}
 			// 更新页面文件中的图片标记，并将所有的页面内容合并到一个字符串中
