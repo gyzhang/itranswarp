@@ -65,7 +65,7 @@ public class MarkdownFileUtil {
 	public static Map<Integer, MarkdownImageBean> readImageLines(List<String> lines) {
 		Map<Integer, MarkdownImageBean> imgs = new HashMap<Integer, MarkdownImageBean>();
 		for (int i = 0; i < lines.size(); i++) {
-			String line = trimLeft(lines.get(i));
+			String line = lines.get(i).trim();
 			if (line.startsWith("![") && line.endsWith(")")) {// MarkDown 图片标签为 ![这是一张图片](http://www.abc.com/def.png)
 				String imgUrl = line.substring(line.indexOf("](") + 2, line.lastIndexOf(")"));// 提取图片url地址
 				String imgTip = line.substring(line.indexOf("![") + 2, line.indexOf("]"));// 提取图片的描述信息
