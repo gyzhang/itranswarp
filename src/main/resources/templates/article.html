@@ -55,6 +55,8 @@ $(function () {
     <p><a href="/user/{{ author.id }}">{{ author.name }}</a> / <a href="/category/{{ category.id }}">{{ category.name }}</a> / <span class="x-smart-datetime" data="{{ article.publishAt }}">...</span> / {{ _('Reads') }}: {{ article.views }}</p>
     <div class="x-article-content x-main-content">
         {{ content|raw }}
+		<h4>读后有收获可以请作者喝咖啡</h4>
+		<p><img alt="微信支付" src="/static/img/wechatPay.png" style="width: 200px;” ></p>
     </div>
 {% endblock %}
 
