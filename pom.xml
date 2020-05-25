@@ -32,7 +32,7 @@
 		<!-- override springboot managed mysql connector version -->
 		<mysql.version>5.1.47</mysql.version>
 
-		<commonmark.version>0.12.1</commonmark.version>
+		<commonmark.version>0.15.0</commonmark.version>
 		<commons-validator.version>1.6</commons-validator.version>
 		<lesscss.version>1.7.0.1.1</lesscss.version>
 		<lucene.version>8.5.0</lucene.version>
