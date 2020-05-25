@@ -53,7 +53,8 @@
 
 	<!-- BEGIN CSS -->
 	<link rel="stylesheet" href="/static/css/codemirror.css" />
-	<link rel="stylesheet" href="/static/css/highlight.css" />
+	<!-- 代码高亮显示的样式文件，9.1.0版本 -->
+    <link rel="stylesheet" href="/static/css/monokai-sublime.min.css">
 	<link rel="stylesheet" href="/static/css/katex.css" />
 	<link rel="stylesheet" href="/static/css/simditor.css" />
 	<link rel="stylesheet" href="/static/css/main.css?v={{ __version__ }}" />
@@ -64,7 +65,12 @@
 	<script src="/static/js/3rdparty/moment-with-locales.min.js"></script>
 	<script src="/static/js/3rdparty/marked.js"></script>
 	<script src="/static/js/3rdparty/codemirror.js"></script>
-	<script src="/static/js/3rdparty/highlight.js"></script>
+	<!-- 代码高亮显示，9.1.0版本 -->
+    <script src="/static/js/3rdparty/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <!-- 代码行数，2.5.0版本 -->
+    <script src="/static/js/3rdparty/highlightjs-line-numbers.min.js"></script>
+    <script>hljs.initLineNumbersOnLoad();</script>
 	<script src="/static/js/3rdparty/katex.js"></script>
 	<script src="/static/js/3rdparty/module.js"></script>
 	<script src="/static/js/3rdparty/hotkeys.js"></script>
@@ -101,7 +107,34 @@
 {% endif %}
 		}
 	</style>
-
+	<style>
+	    pre code {
+	        font-family: consolas, Menlo, "PingFang SC", "Microsoft YaHei", monospace;
+	    }
+	</style>
+	<style>
+	    .hljs {
+	        padding: 0;
+	    }
+	
+	    .hljs-ln td {
+	        padding: 2px 10px;
+	    }
+	
+	    /* for block of numbers */
+	    td.hljs-ln-numbers {
+	        text-align: center;
+	        color: #2F7689;
+	        background-color: #EFF2F3;
+	        /*border-right: 0.5px solid #CCC;*/
+	        vertical-align: top;
+	    }
+	
+	    /* for block of code */
+	    td.hljs-ln-code {
+	        padding-left: 5px;
+	    }
+	</style>
 	<script>
 		// global variables:
 		var g_time = parseFloat('{{ __timestamp__ }}');
