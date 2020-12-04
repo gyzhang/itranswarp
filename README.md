@@ -1,5 +1,25 @@
 # iTranswarp
 
+### 如何修改代码，发布阿里云上的个人版本？
+
+1. 使用云上版本中的 application.yml 配置文件，其中包括 https 端口 443，ssl 证书配置，数据库对应密码；
+2. 检查 resource 下的证书文件 your_cert_file.pfx；
+3. maven package 跳过测试，在打包过程中会编译 main.less 生成 main.css 文件;
+4. 在服务器上执行 sh itranswarp.sh stop 命令，然后拷贝打包后的 itranswarp.jar 文件到服务器上；
+5. 在服务器上执行 sh itranswarp.sh start 命令，启动应用提供服务；
+6. 访问 xprogrammer.net，检查是否正常提供服务。
+
+```yaml
+server:
+  port: ${SERVER_PORT:443}
+  ssl:
+    enabled: true
+    key-store: classpath:your_cert_file.pfx
+    key-store-password: your password here
+```
+
+
+
 Full-featured CMS including blog, wiki, discussion, etc. powered by SpringBoot.
 
 [![Build Status](https://travis-ci.org/michaelliao/itranswarp.svg?branch=master)](https://travis-ci.org/michaelliao/itranswarp)
