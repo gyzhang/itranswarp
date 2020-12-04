@@ -147,6 +147,7 @@ public class WikiService extends AbstractService<Wiki> {
 	public Wiki importWiki(User user, WikiImportBean bean) throws Exception {
 		String hdImage = settingService.getWebsiteFromCache().hdImage;
 		boolean usingHD = false;
+		String separator = System.getProperty("line.separator");
 		if (null != hdImage && hdImage.length() > 0) {
 			usingHD = hdImage.toLowerCase().equals("hd")? true: false;
 		}
@@ -193,7 +194,7 @@ public class WikiService extends AbstractService<Wiki> {
 				if (imgs.containsKey(i)) {
 					lines.set(i, imgs.get(i).getImageMark());
 				}
-				sbPage.append(lines.get(i)).append(System.getProperty("line.separator"));// 合并更新了图片标记后的每一行
+				sbPage.append(lines.get(i)).append(separator).append(separator);// 合并更新了图片标记后的每一行。按照markdwon的惯用模式，段和段之间有个空行，所以需要换行两次。
 			}
 			
 			WikiPage page = new WikiPage();

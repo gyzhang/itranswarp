@@ -13,20 +13,22 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.itranswarp.bean.MarkdownImageBean;
 
 /**
  * 操作MarkDown文件的工具类
- * 
- * @author kevin
  *
+ * @author kevin
+ * @date 20201204
  */
 public class MarkdownFileUtil {
 
 	/**
 	 * 按行读取文件到List中
-	 * 
+	 *
 	 * @param file 待读取的文件
 	 * @return 按行存储的list
 	 * @throws FileNotFoundException
@@ -38,7 +40,10 @@ public class MarkdownFileUtil {
 			String line;
 			// 按行读取字符串
 			while ((line = bf.readLine()) != null) {
-				lines.add(line);
+				List<String> tempLines = covertLines(line);//将1行文字进行拆分，找出其中夹杂的图片标签
+				for(String tempLine: tempLines){
+					lines.add(tempLine);
+				}
 			}
 			return lines;
 		}
@@ -46,19 +51,28 @@ public class MarkdownFileUtil {
 
 	/**
 	 * 从文本中按行划分为List
-	 * 
+	 *
 	 * @param content
 	 * @return
 	 */
 	public static List<String> readLines(String content) {
 		String[] strs = content.split(System.getProperty("line.separator"));
-		List<String> lines = Arrays.asList(strs);
+		List<String> contentLines = Arrays.asList(strs);
+		List<String> lines = new ArrayList<String>();
+
+		for(String line: contentLines){
+			List<String> tempLines = covertLines(line);//将1行文字进行拆分，找出其中夹杂的图片标签
+			for(String tempLine: tempLines){
+				lines.add(tempLine);
+			}
+		}
+
 		return lines;
 	}
 
 	/**
 	 * 获取图片标记行
-	 * 
+	 *
 	 * @param lines MD文件的所有行
 	 * @return MD文件中的图片标记行
 	 */
@@ -101,15 +115,15 @@ public class MarkdownFileUtil {
 
 	/**
 	 * 将按行存储的list写入文件
-	 * 
+	 *
 	 * @param lines
 	 * @param file
 	 * @throws IOException
 	 */
 	public static void writeFile(List<String> lines, File file) throws IOException {
 		try (FileWriter fw = new FileWriter(file)) {
-			for (int i = 0; i < lines.size(); i++) {
-				fw.write(lines.get(i));
+			for (String line: lines) {
+				fw.write(line);
 				fw.write(System.getProperty("line.separator"));
 			}
 		}
@@ -117,21 +131,54 @@ public class MarkdownFileUtil {
 
 	/**
 	 * 将字节数组写入文件
-	 * 
+	 *
 	 * @param bytes
 	 * @param file
 	 * @throws IOException
 	 */
 	public static void writeFile(byte[] bytes, File file) throws IOException {
 		try (FileOutputStream fos = new FileOutputStream(file);
-				BufferedOutputStream bos = new BufferedOutputStream(fos)) {
+			 BufferedOutputStream bos = new BufferedOutputStream(fos)) {
 			bos.write(bytes);
 		}
 	}
 
 	/**
+	 * 将1行文字中含有图片的内容拆分成多行。
+	 * 例如：下面这张图片在md文件中没有换行。![微信支付](images/wechatPay.png)这张图片夹杂![支付宝支付](images/AliPay.png)在一行文字中。
+	 * 上面这行文字将拆分为5行
+	 * @param line 文字内容
+	 * @return 拆分为多行的一个list
+	 */
+	public static List<String> covertLines(String line){
+		List<String> lines = new ArrayList<String>();
+
+		String imgRegex = "!\\[(.*?)\\]\\((.*?)\\)";//MarkDown文件中的图片正则表达式
+		Pattern patten = Pattern.compile(imgRegex);
+		Matcher matcher = patten.matcher(line);
+		List<String> imgStrs = new ArrayList<String>();
+		while (matcher.find()) {//find每次被调用后，会偏移到下一个匹配
+			imgStrs.add(matcher.group());//获取当前匹配的值
+		}
+
+		int start = 0;
+		for (String imgStr: imgStrs){
+			if (line.indexOf(imgStr) > 0){//图片不在开头
+				lines.add(line.substring(start, line.indexOf(imgStr)));//图片前面的文字
+			}
+			lines.add(imgStr);//添加图片标签行
+			start = line.indexOf(imgStr) + imgStr.length();
+		}
+		if (start < line.length()){//最后一个图片标签后面的文字
+			lines.add(line.substring(start));
+		}
+
+		return lines;
+	}
+
+	/**
 	 * 去除左空格
-	 * 
+	 *
 	 * @param str
 	 * @return
 	 */
@@ -145,7 +192,7 @@ public class MarkdownFileUtil {
 
 	/**
 	 * 去除右空格
-	 * 
+	 *
 	 * @param str
 	 * @return
 	 */

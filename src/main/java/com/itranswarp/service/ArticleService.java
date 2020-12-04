@@ -248,11 +248,12 @@ public class ArticleService extends AbstractService<Article> {
 		}
 		// 更新原 MD 文件中的图片标记，并将所有的文章内容合并到一个字符串中
 		StringBuffer sb = new StringBuffer();
+		String separator = System.getProperty("line.separator");
 		for (int i = 0; i < lines.size(); i++) {// 替换MD文件内容中的图片标签
 			if (imgs.containsKey(i)) {
 				lines.set(i, imgs.get(i).getImageMark());
 			}
-			sb.append(lines.get(i)).append(System.getProperty("line.separator"));// 合并更新了图片标记后的每一行
+			sb.append(lines.get(i)).append(separator).append(separator);// 合并更新了图片标记后的每一行。按照markdwon的惯用模式，段和段之间有个空行，所以需要换行两次
 		}
 
 		article.id = IdUtil.nextId();
