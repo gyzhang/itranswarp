@@ -69,6 +69,20 @@
                         }, onJsonError);
                     });
                 },
+                reImportArticle: function (id) {// 从gitbook导入wiki
+                    var now = Date.now();
+                    UIkit.modal.prompt("{{ _('Article 在服务器上的位置') }}:", "{{ _('/Users/kevin/temp/test.md') }}", function (path) {
+                        postJSON('/api/articles/reImport/local', {
+                            articleId: id,
+                            articlePath: path
+                        }, function (err, result) {
+                            if (err) {
+                                showError(err);
+                                return;
+                            }
+                        });
+                    });
+                },
             }
         });
     }
@@ -127,6 +141,7 @@
                 <td>
                     <a v-on:click="editArticle(a.id)" title="Edit Article" href="#0" class="x-btn"><i class="uk-icon-edit"></i></a>
                     <a v-on:click="deleteArticle(a.id)" title="Delete Article" href="#0" class="x-btn"><i class="uk-icon-trash"></i></a>
+                    <a v-on:click="reImportArticle(a.id)" title="重新导入（更新）" href="#0" class="x-btn"><i class="uk-icon-file-text-o"></i></a>
                 </td>
             </tr>
         </tbody>

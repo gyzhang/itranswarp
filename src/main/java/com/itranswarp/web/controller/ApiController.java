@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.itranswarp.bean.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,23 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.itranswarp.bean.AdMaterialBean;
-import com.itranswarp.bean.AdPeriodBean;
-import com.itranswarp.bean.AdSlotBean;
-import com.itranswarp.bean.ArticleBean;
-import com.itranswarp.bean.AttachmentBean;
-import com.itranswarp.bean.BoardBean;
-import com.itranswarp.bean.CategoryBean;
-import com.itranswarp.bean.NavigationBean;
-import com.itranswarp.bean.ReplyBean;
-import com.itranswarp.bean.SinglePageBean;
-import com.itranswarp.bean.SortBean;
-import com.itranswarp.bean.TopicBean;
-import com.itranswarp.bean.UserBean;
-import com.itranswarp.bean.WikiBean;
-import com.itranswarp.bean.WikiImportBean;
-import com.itranswarp.bean.WikiPageBean;
-import com.itranswarp.bean.WikiPageMoveBean;
 import com.itranswarp.bean.setting.Follow;
 import com.itranswarp.bean.setting.Security;
 import com.itranswarp.bean.setting.Snippet;
@@ -236,6 +220,27 @@ public class ApiController extends AbstractController {
 			this.articleService.deleteArticlesFromCache(article.categoryId);
 		}
 		
+		return article;
+	}
+
+	/**
+	 * 从服务器本地 Markdown 文件中重新导入（就是更新以前导入的，以方便离线修改文章错误），需要事先将 Markdown 文件scp到服务器上，用来维护现有离线文章的
+	 * @param bean
+	 * @return
+	 */
+	@PostMapping("/articles/reImport/local")
+	@RoleWith(Role.CONTRIBUTOR)
+	public Article articleReImport(@RequestBody ArticleReImportBean bean) {
+		Article article = null;
+		try {
+			article = this.articleService.reImportArticle(HttpContext.getRequiredCurrentUser(), bean);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (article != null) {
+			this.articleService.deleteArticlesFromCache(article.categoryId);
+		}
+
 		return article;
 	}
 
