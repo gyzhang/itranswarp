@@ -106,7 +106,7 @@ function initVM(wikis) {
                     <td><span v-text="w.tag"></span></td>
                     <td><span v-text="w.publishAt.toDateTime()"></span></td>
                     <td>
-                        <a v-on:click="importBook(w)" data-toggle="tooltip" title="在当前新Wiki上导入一本Gitbook" href="#0" class="x-btn"><i class="uk-icon-book"></i></a>
+                        <a v-on:click="importBook(w)" data-toggle="tooltip" title="在当前Wiki上导入一本Gitbook（多次导入可更新）" href="#0" class="x-btn"><i class="uk-icon-book"></i></a>
                         <a v-on:click="editWiki(w)" data-toggle="tooltip" title="Edit Wiki" href="#0" class="x-btn"><i class="uk-icon-list"></i></a>
                         <a v-on:click="deleteWiki(w)" data-toggle="tooltip" title="Delete wiki" href="#0" class="x-btn"><i class="uk-icon-trash"></i></a>
                     </td>
